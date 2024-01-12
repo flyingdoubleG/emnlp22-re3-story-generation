@@ -17,7 +17,7 @@ def add_summarizer_args(parser):
     parser.add_argument('--summarizer-presence-penalty', type=float, default=0, help='presence penalty for summarizer')
     parser.add_argument('--generation-max-length', type=int, default=256, help='max length for generation, not including prompt')
     parser.add_argument('--summarizer-beam-size', type=int, default=1, help='beam size for summarizer')
-    parser.add_argument('--gpt3-model', type=str, default='text-davinci-002', help='gpt3 model or finetuned ckpt for GPT3Summarizer')
+    parser.add_argument('--gpt3-model', type=str, default='gpt-3.5-turbo-1106', help='gpt3 model or finetuned ckpt for GPT3Summarizer')
     parser.add_argument('--max-context-length', type=int, default=1024, help='max length for context to facilitate toy version')
     parser.add_argument('--alpa-url', type=str, default=None, help='url for alpa API')
     parser.add_argument('--alpa-port', type=str, default=None, help='port for alpa API, if alpa-url is a filename to read server location from. convenient for slurm')

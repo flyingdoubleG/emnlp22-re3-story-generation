@@ -27,7 +27,7 @@ from story_generation.common.controller.controller_util import add_controller_ar
 from story_generation.common.controller.loaders.alignment_loader import create_prefix_completion
 from story_generation.common.data.split_paragraphs import *
 
-def generate_initial_entity_strings(premise, setting, instruct_model, num_entities=3, max_description_length=48, model_string='text-davinci-002'):
+def generate_initial_entity_strings(premise, setting, instruct_model, num_entities=3, max_description_length=48, model_string='gpt-3.5-turbo-instruct'):
     # TODO figure out alternative stopping criterion for generating initial characters?
     initial_characters_prompt = "Premise: " + premise.strip() + '\n\n' + 'Setting: ' + setting.strip() + '\n\nList the names and details of all major characters.'
     name_bias_words = ['protagonist', 'Protagonist', 'PROTAGONIST', 'unnamed', 'Unnamed', 'UNNAMED', 'unknown', 'Unknown', 'UNKNOWN', 'None', 'none', 'None', 'Mr.', 'Ms.', 'Mrs.', 'Dr.', 'TBA', 'TBD', 'N/A'] # technically no ' can filter out some reasonable names, but it's not a big deal and prevents some bad cases
@@ -93,7 +93,7 @@ def generate_initial_entity_strings(premise, setting, instruct_model, num_entiti
     return characters_prompt[len(initial_characters_prompt):].strip(), character_strings, infer_attributes_string
 
 
-def generate_outline(premise, setting, characters, character_strings, instruct_model, generation_max_length, max_sections=5, fixed_outline_length=-1, outline_levels=1, model_string='text-davinci-002'):
+def generate_outline(premise, setting, characters, character_strings, instruct_model, generation_max_length, max_sections=5, fixed_outline_length=-1, outline_levels=1, model_string='gpt-3.5-turbo-instruct'):
     premise_setting_chars = "Premise: " + premise.strip() + '\n\n' + 'Setting: ' + setting.strip() + '\n\n' + 'Characters: ' + characters.strip()
 
     if fixed_outline_length > 0:
@@ -174,7 +174,7 @@ def load_plan_info(plan_file):
     return save_info
 
 
-def generate_plan_info(args, instruct_model, include_outline=True, model_string='text-davinci-002'):
+def generate_plan_info(args, instruct_model, include_outline=True, model_string='gpt-3.5-turbo-instruct'):
     while True:
         try:
             if args.premise is None:

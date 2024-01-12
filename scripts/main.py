@@ -76,8 +76,8 @@ if __name__=='__main__':
     parser.add_argument('--extension-method', type=str, choices=['gpt3', 'opt'], default='gpt3', help='generator to use for main story drafting')
     parser.add_argument('--repetition-penalty-weight', type=float, default=5, help='weight of repetition penalty')
     parser.add_argument('--draft-top-p', type=float, default=1, help='initial top_p for beam search')
-    parser.add_argument('--plan-model-string', type=str, default='text-davinci-002', help='gpt3 model string to use in planning')
-    parser.add_argument('--draft-model-string', type=str, default='davinci', help='gpt3 model string to use in extending story')
+    parser.add_argument('--plan-model-string', type=str, default='gpt-3.5-turbo-instruct', help='gpt3 model string to use in planning')
+    parser.add_argument('--draft-model-string', type=str, default='gpt-3.5-turbo-instruct', help='gpt3 model string to use in extending story')
     parser.add_argument('--cut-sentence', action='store_true', default=False, help='cut incomplete sentence at end of generation')
     
     args = parser.parse_args()

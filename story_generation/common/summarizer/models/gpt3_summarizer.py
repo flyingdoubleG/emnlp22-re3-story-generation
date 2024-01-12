@@ -7,13 +7,14 @@ import numpy as np
 import torch
 from transformers import AutoTokenizer
 import openai
-
+from openai import OpenAI
 from story_generation.common.summarizer.models.abstract_summarizer import AbstractSummarizer
 from story_generation.common.data.split_paragraphs import split_paragraphs, cut_last_sentence
+import pdb
 
 GPT3_SEP = '\n\n###\n\n'
 GPT3_END = 'THE END.'
-PRETRAINED_MODELS = ['ada', 'babbage', 'curie', 'davinci', 'text-ada-001', 'text-babbage-001', 'text-curie-001', 'text-davinci-001', 'text-davinci-002']
+PRETRAINED_MODELS = ['babbage-002', 'gpt-3.5-turbo-instruct']
 
 class GPT3Summarizer(AbstractSummarizer):
     def __init__(self, args):
@@ -92,14 +93,13 @@ class GPT3Summarizer(AbstractSummarizer):
                     if generation_max_length is None:
                         generation_max_length = min(self.args.generation_max_length, self.args.max_context_length - context_length)
                     engine = self.model if model_string is None else model_string
-                    if engine == 'text-davinci-001':
-                        engine = 'text-davinci-002' # update to latest version
+                    # pdb.set_trace()
                     if engine in PRETRAINED_MODELS:
                         logging.log(21, 'PROMPT')
                         logging.log(21, prompt)
                         logging.log(21, 'MODEL STRING:' + ' ' + self.model if model_string is None else model_string)
-                        completion = openai.Completion.create(
-                            engine=engine,
+                        completion = OpenAI().completions.create(
+                            model=engine,
                             prompt=prompt,
                             max_tokens=generation_max_length,
                             temperature=temperature if temperature is not None else self.args.summarizer_temperature,
@@ -113,7 +113,7 @@ class GPT3Summarizer(AbstractSummarizer):
                         logging.log(21, 'PROMPT')
                         logging.log(21, prompt)
                         logging.log(21, 'MODEL STRING:' + ' ' + self.model if model_string is None else model_string)
-                        completion = openai.Completion.create(
+                        completion = OpenAI().completions.create(
                             model=engine,
                             prompt=prompt,
                             max_tokens=generation_max_length,
@@ -134,7 +134,8 @@ class GPT3Summarizer(AbstractSummarizer):
                     if retry:
                         logging.warning('retrying...')
                         time.sleep(num_fails)
-            outputs += [completion['choices'][j]['text'] for j in range(num_completions)]
+            # pdb.set_trace()
+            outputs += [completion.choices[j].text for j in range(num_completions)]
         if cut_sentence:
             for i in range(len(outputs)):
                 if len(outputs[i].strip()) > 0:

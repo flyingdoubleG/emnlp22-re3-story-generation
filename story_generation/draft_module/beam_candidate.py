@@ -82,7 +82,7 @@ class BeamCandidate:
         dpr_query_encoder, dpr_context_encoder = load_dpr()
         if previous_paragraph is not None:
             summary_prompt = previous_paragraph.strip() + '\n\n\n\nOne-sentence summary:\n\n\n\n'
-            summary = self.model([summary_prompt], modify_prompt=False, model_string='text-curie-001')[0].strip()
+            summary = self.model([summary_prompt], modify_prompt=False, model_string='gpt-3.5-turbo-instruct')[0].strip()
             query_encoding = dpr_query_encoder.encode('Previous passage summary: ' + summary + '\n\nCurrent story outline: ' + outline_section.strip() + '\n\nWho or what appears in the upcoming paragraphs?')
         else:
             query_encoding = dpr_query_encoder.encode('Current story outline: ' + outline_section.strip() + '\n\nWho or what appears in the upcoming paragraphs?')
@@ -201,7 +201,7 @@ class BeamCandidate:
             previous_passage = self.previous_passage(int(self.args.max_context_length/2), suffix=previous_text)
             if len(self.model.tokenizer.encode(previous_passage)) > int(self.args.max_context_length/4): # no need to do this extra summary if it's really short
                 max_preceding_summary_tokens = 128
-                preceding_summary = self.model([previous_passage + '\n\nSummarize the events in this passage.'], generation_max_length=max_preceding_summary_tokens, model_string='text-curie-001')[0].strip()
+                preceding_summary = self.model([previous_passage + '\n\nSummarize the events in this passage.'], generation_max_length=max_preceding_summary_tokens, model_string='gpt-3.5-turbo-instruct')[0].strip()
                 if len(self.model.tokenizer.encode(preceding_summary)) == max_preceding_summary_tokens:
                     logging.warning('Warning: preceding events summary is too long, truncating')
                 prompt += '\n\n\n\nEvents immediately prior to the upcoming passage: ' + preceding_summary

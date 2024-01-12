@@ -17,6 +17,7 @@ from transformers import pipeline, AutoTokenizer, AutoModelForSequenceClassifica
 from flair.data import Sentence
 from flair.models import SequenceTagger
 import openai
+from openai import OpenAI
 from scipy.special import softmax
 import numpy as np
 import nltk
@@ -313,7 +314,7 @@ def gpt3_edit(text, instruction, prefix=None, filter_append=True, temperature=0.
             try:
                 with time_limit(30):
                     completion = openai.Edit.create(
-                                        engine='text-davinci-edit-001',
+                                        engine='gpt-3.5-turbo-instruct',
                                         input=text if prefix is None else prefix.strip() + ' ' + text,
                                         instruction=instruction,
                                         temperature=temperature,
@@ -331,7 +332,7 @@ def gpt3_edit(text, instruction, prefix=None, filter_append=True, temperature=0.
                 logging.log(23, 'retrying...')
         tokenizer = load_gpt_tokenizer()
         outputs = [completion['choices'][i]['text'] for i in range(num_completions)]
-        logging.log(21, 'GPT3 CALL'  + ' ' + 'text-davinci-edit-001' + ' ' + str(len(tokenizer.encode(text if prefix is None else prefix.strip() + ' ' + text)) + sum([len(tokenizer.encode(o)) for o in outputs])))
+        logging.log(21, 'GPT3 CALL'  + ' ' + 'gpt-3.5-turbo-instruct' + ' ' + str(len(tokenizer.encode(text if prefix is None else prefix.strip() + ' ' + text)) + sum([len(tokenizer.encode(o)) for o in outputs])))
         edited_texts = []
         for i in range(num_completions):
             edited_text = completion['choices'][i]['text']
@@ -409,8 +410,8 @@ def gpt3_insert(prefix, suffix, top_p=1, temperature=1, max_tokens=256, frequenc
     retry = True
     while retry:
         try:
-            completion = openai.Completion.create(
-                engine="text-davinci-002",
+            completion = OpenAI().completions.create(
+                model="gpt-3.5-turbo-instruct",
                 prompt=prefix,
                 suffix=suffix,
                 temperature=temperature,
@@ -425,9 +426,9 @@ def gpt3_insert(prefix, suffix, top_p=1, temperature=1, max_tokens=256, frequenc
             logging.log(23, e)
             time.sleep(0.2)
             logging.log(23, 'retrying...')
-    outputs = [completion['choices'][i]['text'] for i in range(len(completion['choices']))]
+    outputs = [completion.choices[i].text for i in range(len(completion.choices))]
     tokenizer = load_gpt_tokenizer()
-    logging.log(21, 'GPT3 CALL' + ' ' + 'text-davinci-002' + ' ' + str(len(tokenizer.encode(prefix)) + len(tokenizer.encode(suffix)) + sum([len(tokenizer.encode(o)) for o in outputs])))
+    logging.log(21, 'GPT3 CALL' + ' ' + 'gpt-3.5-turbo-instruct' + ' ' + str(len(tokenizer.encode(prefix)) + len(tokenizer.encode(suffix)) + sum([len(tokenizer.encode(o)) for o in outputs])))
     return outputs
 
 

@@ -14,6 +14,7 @@ import logging
 
 import torch
 import openai
+from openai import OpenAI
 from scipy.special import softmax
 import numpy as np
 
@@ -21,8 +22,8 @@ from story_generation.common.util import *
 from story_generation.common.data.split_paragraphs import split_paragraphs
 
 
-ENTITY_MODEL_STRING = 'text-curie-001'
-STRONGER_ENTITY_MODEL_STRING = 'text-davinci-002'
+ENTITY_MODEL_STRING = 'gpt-3.5-turbo-instruct'
+STRONGER_ENTITY_MODEL_STRING = 'gpt-3.5-turbo-instruct'
 
 
 example_library = None
@@ -313,7 +314,7 @@ class Entity:
         return prompt + entry_counter.most_common()[0][0]
 
     @torch.no_grad()
-    def infer_description(self, passage, gpt3_model, max_length=48): # ideally text-davinci-001
+    def infer_description(self, passage, gpt3_model, max_length=48): # ideally gpt-3.5-turbo-instruct
         assert self.description is None
         query = 'Excerpt:\n\n... ' + passage.strip() + ' ...\n\nWrite a one-sentence summary of ' + self.name + ' in the context of this story.\n\n' + self.name + ' is'
         for _ in range(5):
@@ -328,15 +329,15 @@ class Entity:
         return self.description
     
     @torch.no_grad()
-    def infer_is_character(self, passage, gpt3_model, threshold=CHARACTER_THRESHOLD): # ideally text-davinci-002
+    def infer_is_character(self, passage, gpt3_model, threshold=CHARACTER_THRESHOLD): # ideally gpt-3.5-turbo-instruct
         assert self.is_character is None
         query = 'Excerpt:\n\n... ' + passage.strip() + ' ...\n\n' + 'Question:\n\nIs __CHARACTER__ a character, as opposed to e.g., a place or thing?'.replace('__CHARACTER__', self.name) + '\n\n'
         retry = True
         logging.log(21, 'GPT3 CALL' + ' ' + gpt3_model.model + ' ' + str(len(gpt3_model.tokenizer.encode(query)) + 1))
         while retry:
             try:
-                completion = openai.Completion.create(
-                                    engine=gpt3_model.model,
+                completion = OpenAI().completions.create(
+                                    model=gpt3_model.model,
                                     prompt=query,
                                     max_tokens=1,
                                     temperature=1,
@@ -350,7 +351,7 @@ class Entity:
                 logging.log(23, str(e))
                 time.sleep(0.2)
                 logging.log(23, 'retrying...')
-        logprobs = completion['choices'][0]['logprobs']['top_logprobs'][0]
+        logprobs = completion.choices[0].logprobs['top_logprobs'][0]
         logprobs = [logprobs['No'], logprobs['Yes']]
         self.is_character = softmax(logprobs)[1] > threshold
         return self.is_character

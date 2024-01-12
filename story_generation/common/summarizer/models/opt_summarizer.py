@@ -296,6 +296,8 @@ class OPTSummarizer(AbstractSummarizer):
                     pass # don't re-penalize tokens based on this upper/lowercase heuristic
                 else:
                     logit_bias[token] = bias
+        if len(logit_bias) > 300:
+            logit_bias = dict(list(logit_bias.items())[:300])
         return logit_bias
 
     def fit(self, dataset):
